@@ -92,6 +92,62 @@ app.post('/api/textnotes', (req, res) => {
       }
     });
   });
+
+// Endpoint untuk mengecek keberadaan akun berdasarkan username dan password
+app.post('/api/account/check', (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username dan password diperlukan' });
+  }
+
+  connection.query('SELECT * FROM Account WHERE username = ? AND password = ?', [username, password], (error, results, fields) => {
+    if (error) {
+      console.log(error);
+      res.status(500).json({ error: 'Internal server error' });
+      return;
+    }
+
+    if (results.length > 0) {
+      res.json({ exists: true });
+    } else {
+      res.json({ exists: false });
+    }
+  });
+});
+
+// Endpoint untuk registrasi akun baru
+app.post('/api/account/register', (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username dan password diperlukan' });
+  }
+
+  // Periksa apakah username sudah ada
+  connection.query('SELECT * FROM Account WHERE username = ?', [username], (error, results, fields) => {
+    if (error) {
+      console.log(error);
+      res.status(500).json({ error: 'Internal server error' });
+      return;
+    }
+
+    if (results.length > 0) {
+      res.status(400).json({ error: 'Username sudah ada' });
+    } else {
+      // Tambahkan akun baru ke database
+      connection.query('INSERT INTO Account (username, password) VALUES (?, ?)', [username, password], (error, results, fields) => {
+        if (error) {
+          console.log(error);
+          res.status(500).json({ error: 'Internal server error' });
+          return;
+        }
+
+        res.status(201).json({ success: true, message: 'Akun berhasil didaftarkan' });
+      });
+    }
+  });
+});
   
   // Jalankan server
 app.listen(port, () => {
