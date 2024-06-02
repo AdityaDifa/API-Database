@@ -128,18 +128,18 @@ app.post('/api/account/register', (req, res) => {
   connection.query('SELECT * FROM Account WHERE username = ?', [username], (error, results, fields) => {
     if (error) {
       console.log(error);
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(500).json({ message: 'Internal server error' });
       return;
     }
 
     if (results.length > 0) {
-      res.status(400).json({ error: 'Username sudah ada' });
+      res.status(400).json({ message: 'Username sudah ada' });
     } else {
       // Tambahkan akun baru ke database
       connection.query('INSERT INTO Account (username, password) VALUES (?, ?)', [username, password], (error, results, fields) => {
         if (error) {
           console.log(error);
-          res.status(500).json({ error: 'Internal server error' });
+          res.status(500).json({ message: 'Internal server error' });
           return;
         }
 
